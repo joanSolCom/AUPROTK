@@ -14,13 +14,14 @@ logging.basicConfig(level = logging.INFO, format = '%(levelname)-10s  %(message)
 def createInstanceCollection(path):
 	iC = InstanceCollection()
 
-	#Expects a header
-	with open(path,'r') as tsvin:
-		tsvin = csv.reader(tsvin, delimiter='\t')
-		for idx, row in enumerate(tsvin):
-			if idx > 0:
-				instance = Instance(row[0], row[2], row[1])
-				iC.addInstance(instance)
+	fd = open(path,"r")
+	read = csv.DictReader(fd, dialect="excel-tab")
+	
+	for row in read:
+		instance = Instance(row["id"], row["label"], row["text"])
+		iC.addInstance(instance)
+
+	fd.close()
 
 	return iC
 
