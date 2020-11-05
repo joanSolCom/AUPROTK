@@ -8,6 +8,7 @@ class TreeOperations:
 		if not conllStringSentence:
 			raise ValueError("Please input a correct conll sentence")
 			return
+
 		self.tree = self.conll_to_tree(conllStringSentence)
 
 	def conll_to_tree(self, conllString):
@@ -27,7 +28,7 @@ class TreeOperations:
 			parentId = int(pieces[5])
 			iNode = Node(line, idNode, arcLabel, parentId)
 			nodeDict[idNode] = iNode
-			if parentId == 0:
+			if parentId == idNode:
 				root = iNode
 
 		return nodeDict, root
@@ -35,7 +36,7 @@ class TreeOperations:
 
 	def link_nodes(self, nodeDict):
 		for idNode, iNode in nodeDict.items():
-			if iNode.parent > 0:
+			if iNode.parent != idNode:
 				iParent = nodeDict[iNode.parent]
 				iParent.addChild(iNode)
 				iNode.setParent(iParent)
@@ -182,7 +183,7 @@ class SyntacticTreeOperations(TreeOperations):
 	def get_composed_verb_ratio(self):
 		verbTags = ["VB","VBD","VBG","VBN","VBP","VBZ", "MD"]
 		verbFreq, total = self.search_pos_frequency(verbTags)
-		depFreq, vcFreq = self.search_deps_frequency(["VC"])
+		depFreq, vcFreq = self.search_deps_frequency(["aux","auxpass","csubj","csubjpass"])
 
 		if vcFreq > 0 and total > 0:
 			composedVerbRatio = vcFreq / total
@@ -203,7 +204,6 @@ class SyntacticTreeOperations(TreeOperations):
 		return modalRatio
 
 	def create_nodes(self, conllArray):
-		
 		nodeDict = {}
 		root = None
 		for line in conllArray:
@@ -214,7 +214,7 @@ class SyntacticTreeOperations(TreeOperations):
 
 			iNode = SyntacticNode(line, idNode, arcLabel, parentId)
 			nodeDict[idNode] = iNode
-			if parentId == 0:
+			if parentId == idNode:
 				root = iNode
 
 		return nodeDict, root
@@ -260,74 +260,3 @@ class DiscourseTreeOperations(SyntacticTreeOperations):
 				idx += 1
 
 		return idx
-
-
-if __name__ == "__main__":
-
-	path = "/home/joan/Escritorio/Datasets/englishDataset/discourse/71_male"
-	discText = codecs.open(path,"r",encoding="utf-8").read()
-	iDisc = DiscourseTreeOperations(discText)
-	'''path = "/home/joan/Escritorio/conlls/8855_female_connl_parsed.conll"
-
-	conllString = codecs.open(path,"r",encoding="utf-8").read()
-	conllSents = conllString.split("\n\n")
-	
-	adverbialRelations = ["ADV","TMP","LOC","DIR","MNR","PRP","EXT"]
-	modifierRelations = ["NMOD","PMOD","AMOD"]
-
-	verbTags = ["VB","VBD","VBG","VBN","VBP","VBZ", "MD"]
-	nounTags = ["NN","NNS","NNP","NNPS"]
-	adverbTags = ["RB","RBR","RBS","WRB"]
-	adjectiveTags = ["JJ","JJR","JJS"]
-	pronounTags = ["PRP","PRP$","WP","WP$"]
-	determinerTags = ["DT","PDT","WDT"]
-	conjunctionTags = ["CC","IN"]
-
-	superlatives = ["JJS","RBS"]
-	comparatives = ["JJR","RBR"]
-	
-	pastVerbs = ["VBD","VBN"]
-	presentVerbs = ["VBG","VBP","VBZ"]
-
-
-	for conllSent in conllSents:
-		
-		try:
-			iTree = SyntacticTreeOperations(conllSent)		
-			print "SUB "
-			widthDepth = iTree.get_relation_width_depth("SUB")
-			ramFactors = iTree.get_relation_ramification_factor("SUB")
-			levels = iTree.get_relation_depth_level("SUB")
-			print str(widthDepth)
-			print str(ramFactors)
-			print str(levels)
-			print "------------------"
-			print "COORD "
-			widthDepth = iTree.get_relation_width_depth("COORD")
-			ramFactors = iTree.get_relation_ramification_factor("COORD")
-			levels = iTree.get_relation_depth_level("COORD")
-			print str(widthDepth)
-			print str(ramFactors)
-			print str(levels)
-			print "_________________"
-			relFreq = iTree.search_deps_frequency(adverbialRelations)
-			print "ADVERBIAL TAG FREQ",relFreq
-			posFreq, total = iTree.search_pos_frequency()
-			print posFreq, total
-
-			ramFact = iTree.get_ramification_factor()
-			print ramFact
-			width = iTree.get_max_width()
-			print "width -> " + str(width)
-			depth = iTree.get_max_depth()
-			print "depth -> " + str(depth)
-			
-			composedVerbRatio = iTree.get_composed_verb_ratio()
-			print composedVerbRatio
-			modalRatio = iTree.get_modal_ratio()
-			print modalRatio
-
-		except ValueError:
-			print "Empty Sentence, skipping "
-			continue
-	'''

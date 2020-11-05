@@ -29,6 +29,14 @@ class FeatureSet:
 			self.featureDict[featureType][featureName].value /= increment
 		else:
 			raise ValueError("Incorrect Operation")
+	
+	def getFeatures(self):
+		features = {}
+		featureTypeNames = self.getFeatureTypeNames()
+		for featType, featName in featureTypeNames:
+			features[featName] = self.featureDict[featType][featName].value
+
+		return features
 
 	def getFeatureNames(self, featuresSelected=None):
 		featureNames = []
@@ -37,7 +45,7 @@ class FeatureSet:
 			featuresSelected = self.featureDict.keys()
 		
 		for featType in featuresSelected:
-			featureNames.expand(self.featureDict[featType].keys())
+			featureNames.extend(self.featureDict[featType].keys())
 
 		return featureNames
 

@@ -7,13 +7,13 @@ from featureClasses.wordBasedFeatures import WordBasedFeatures
 from featureClasses.sentenceBasedFeatures import SentenceBasedFeatures
 from featureClasses.dictionaryBasedFeatures import DictionaryBasedFeatures
 from featureClasses.syntacticFeatures import SyntacticFeatures
-from featureClasses.lexicalFeatures import LexicalFeatures
 from pprint import pprint
-from machineLearning.classify import SupervisedLearning
+import sys
+import os
 
 logging.basicConfig(level = logging.INFO, format = '%(levelname)-10s  %(message)s')
 
-def compute_features(pathInput, modelName):
+def compute_features(pathInput, modelName="default"):
 	logging.info("Creating Instance Collection")
 	iC = instanceManager.createInstanceCollection(pathInput)
 	
@@ -34,26 +34,24 @@ def compute_features(pathInput, modelName):
 	
 	return iC
 
-
-###Generate training data
-modelName = "sample"
-inPathTrain = "./input/train.tsv"
-featurePathTrain = "./features/train.tsv"
-
-logging.info("Computing features training set")
-iC = compute_features(inPathTrain, modelName)
-logging.info("Generating Output")
-iC.generateTSV(featurePathTrain)
-
-inPathTest = "./input/test.tsv"
-featurePathTest = "./features/test.tsv"
-
-logging.info("Computing features test set")
-iC = compute_features(inPathTest, modelName)
-logging.info("Generating Output")
-iC.generateTSV(featurePathTest)
-
-predictionPath = "./predictions/results.tsv"
-logging.info("Classifying")
-iSup = SupervisedLearning(featurePathTrain, featurePathTest, predictionPath, inPathTest)
-
+if __name__ == "__main__":
+	if len(sys.argv) != 3:
+		logging.error("Wrong number of parameters.")
+		logging.error("This is the correct way: python3 main.py path/to/inputfile path/to/outputFileWhichIsCreatedByTheProgram")
+	else:
+		inputFile = sys.argv[1]
+		if os.path.isfile(inputFile) and not os.path.isdir(inputFile):
+			outputFile = sys.argv[2]
+			logging.info("Computing features")
+			iC = compute_features(inputFile)
+			jsonStr = iC.generateJSONOutput()
+			logging.info("Writing Features in %s",outputFile)
+			with open(outputFile, "w") as fd:
+				fd.write(jsonStr)
+				fd.close()
+			
+			logging.info("Features Correctly Written")
+		
+		else:
+			logging.error("Incorrect input file. Please check that %s, is an existing file and not a directory.", inputFile)
+			logging.error("./input/sampleInput.txt is a correct input file. Use it as inspiration.")

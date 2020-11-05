@@ -98,13 +98,5 @@ SYNPOS_presentVerbs
 SYNSHAPE_width
 SYNSHAPE_depth
 SYNSHAPE_ramFactor
-SYNSHAPE_subDepth
-SYNSHAPE_subWidth
-SYNSHAPE_subRamFact
-SYNSHAPE_subLevel
-SYNSHAPE_coordDepth
-SYNSHAPE_coordWidth
-SYNSHAPE_coordRamFact
-SYNSHAPE_coordLevel
 SYNSHAPE_composedVerbRatio
 SYNSHAPE_modalRatio

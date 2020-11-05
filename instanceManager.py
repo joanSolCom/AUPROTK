@@ -5,23 +5,25 @@ from nltk import word_tokenize
 import codecs
 import nltk
 import spacy
-import csv
+import json
 import logging
+from numpyencoder import NumpyEncoder
 
 logging.basicConfig(level = logging.INFO, format = '%(levelname)-10s  %(message)s')
 
+logging.info("Loading Spacy...")
+en_nlp = spacy.load('en_core_web_lg')
+logging.info("Spacy correctly loaded")
 
-def createInstanceCollection(path):
+def createInstanceCollection(pathInput):
 	iC = InstanceCollection()
 
-	fd = open(path,"r")
-	read = csv.DictReader(fd, dialect="excel-tab")
-	
-	for row in read:
-		instance = Instance(row["id"], row["label"], row["text"])
-		iC.addInstance(instance)
-
-	fd.close()
+	with open(pathInput) as file_with_json_lines:
+		for row in file_with_json_lines:
+			if row.strip():
+				data = json.loads(row)
+				instance = Instance(data["tweet_id"], None, data["text"])
+				iC.addInstance(instance)
 
 	return iC
 
@@ -55,9 +57,7 @@ class Instance:
 		'''
 		
 	def process(self):
-		en_nlp = spacy.load('en')
 		doc = en_nlp(self.text)
-
 		for ent in doc.ents:
 			self.namedEntities.append((ent.text,ent.label_))
 
@@ -87,6 +87,9 @@ class Instance:
 
 			morphDict = en_nlp.vocab.morphology.tag_map[token.tag_]
 			self.morph.append(morphDict)
+
+	def getFeatures(self):
+		return self.featureSet.getFeatures()
 
 	def getFeaturenames(self, featuresSelected):
 		return self.featureSet.getFeaturenames(featuresSelected)
@@ -137,6 +140,17 @@ class InstanceCollection:
 
 	def getFeatureTypeNames(self, featuresSelected=None):
 		return self.instances[0].getFeatureTypeNames(featuresSelected)
+	
+	def generateJSONOutput(self):
+		jsonList = []
+		for instance in self.instances:
+			jsonDict = {}
+			featureDict = instance.getFeatures()
+			jsonDict["features"] = featureDict
+			jsonDict["tweet_id"] = instance.name
+			jsonList.append(jsonDict)
+		
+		return json.dumps(jsonList, cls=NumpyEncoder)
 
 	def generateTSV(self, path=None):
 		featureTypeNames = self.getFeatureTypeNames()
