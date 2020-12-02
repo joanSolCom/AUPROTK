@@ -35,7 +35,8 @@ class Instance:
 		self.featureSet = FeatureSet()
 		self.label = label
 		
-		self.text = text
+		self.text = text.replace("\"","'").replace("\\","")
+		self.text = " ".join(self.text.split())
 		self.namedEntities = []
 		self.tokens = []
 		self.lowerTokens = []
