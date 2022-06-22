@@ -1,5 +1,5 @@
 nltk==3.4.5
-numpy==1.16.4
+numpy==1.22.0
 spacy==2.1.4
 gensim==3.8.1
 numpyencoder==0.3.0
